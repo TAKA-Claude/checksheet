@@ -197,11 +197,24 @@ function openInput() {
 }
 
 function openList() {
-  document.getElementById("homeScreen").style.display = "none";
-  document.getElementById("inputScreen").style.display = "none";
-  document.getElementById("listScreen").style.display = "block";
-  loadRecords();
-  window.scrollTo(0, 0);
+  var pin = prompt("管理者PINを入力してください（4桁）");
+  if (!pin) return;
+  showLoading(true);
+  fetch(GAS_URL + "?action=verifyPin&pin=" + encodeURIComponent(pin))
+    .then(function(res) { return res.json(); })
+    .then(function(data) {
+      showLoading(false);
+      if (data.success && data.verified) {
+        document.getElementById("homeScreen").style.display = "none";
+        document.getElementById("inputScreen").style.display = "none";
+        document.getElementById("listScreen").style.display = "block";
+        loadRecords();
+        window.scrollTo(0, 0);
+      } else {
+        showToast("PINが正しくありません", "#dc2626");
+      }
+    })
+    .catch(function() { showLoading(false); showToast("通信エラー", "#dc2626"); });
 }
 
 // フォームリセット
