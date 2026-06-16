@@ -135,7 +135,7 @@ var ITEMS = {
   chlorine: {
     title: "💧 残留塩素確認（水質検査記録）", badge: "② 残留塩素確認", hasTantou: false, isChlorine: true,
     sections: [{ label: null, items: [
-      {id:"cl01",text:"残留塩素濃度",type:"select",note:"基準値: 0.1 mg/L 以上"},
+      {id:"cl01",text:"残留塩素濃度",type:"select",note:"基準値: 0.1〜1.0 mg/L"},
       {id:"cl02",text:"色",type:"ox"},{id:"cl03",text:"臭い",type:"ox"},{id:"cl04",text:"味",type:"ox"},{id:"cl05",text:"濁り",type:"ox"}
     ]}]
   },
@@ -278,7 +278,7 @@ function renderCheckItems(sheet) {
         var cbStyle = st.done ? "background:#16a34a;border-color:#16a34a;color:#fff" : "background:#fff;border-color:#e2e8f0;color:transparent";
         html += '<div onclick="toggleCheck(\'' + sheet + '\',\'' + item.id + '\')" style="width:28px;height:28px;border:2px solid;border-radius:6px;display:flex;align-items:center;justify-content:center;cursor:pointer;font-size:16px;font-weight:700;' + cbStyle + '">✓</div>';
       } else if (item.type === "number") {
-        html += '<input style="width:80px;padding:6px 8px;border:1px solid #e2e8f0;border-radius:6px;font-size:14px;text-align:right;color:#1e293b" type="number" inputmode="decimal" placeholder="0" value="' + st.value + '" onchange="checkState[\'' + sheet + '\'][\'' + item.id + '\'].value=this.value">';
+        html += '<input style="width:100px;padding:10px 8px;border:2px solid #e2e8f0;border-radius:8px;font-size:18px;font-weight:600;text-align:right;color:#1e293b;background:#f8fafc" type="text" inputmode="numeric" pattern="[0-9]*" placeholder="0" value="' + st.value + '" onfocus="this.style.borderColor=\'#2563eb\';this.select()" onblur="this.style.borderColor=\'#e2e8f0\'" onchange="checkState[\'' + sheet + '\'][\'' + item.id + '\'].value=this.value">';
         if (item.unit) html += '<span style="font-size:12px;color:#64748b">' + item.unit + '</span>';
       } else if (item.type === "select") {
         html += '<select style="padding:6px 8px;border:1px solid #e2e8f0;border-radius:6px;font-size:14px;color:#1e293b;background:#fff" onchange="checkState[\'' + sheet + '\'][\'' + item.id + '\'].value=this.value;updateJudgment()">';
