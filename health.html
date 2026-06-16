@@ -1,0 +1,445 @@
+<!DOCTYPE html>
+<html lang="ja">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0, user-scalable=no">
+<title>GX 浜松CK 健康チェック</title>
+<style>
+*{margin:0;padding:0;box-sizing:border-box}
+body{font-family:-apple-system,BlinkMacSystemFont,"Hiragino Sans",Meiryo,sans-serif;background:#f5f6fa;color:#1e293b;font-size:15px;padding-bottom:80px;-webkit-text-size-adjust:100%}
+@keyframes spin{to{transform:rotate(360deg)}}
+</style>
+</head>
+<body>
+
+<div style="background:linear-gradient(135deg,#0f766e,#14b8a6);color:#fff;padding:14px 16px;text-align:center;position:sticky;top:0;z-index:100;box-shadow:0 2px 8px rgba(20,184,166,0.3)">
+  <div style="font-size:17px;font-weight:700;letter-spacing:0.5px">🏥 GX 浜松CK 健康チェック</div>
+  <div style="font-size:11px;margin-top:3px;display:flex;align-items:center;justify-content:center;gap:5px">
+    <span id="statusDot" style="width:7px;height:7px;border-radius:50%;display:inline-block;background:#f87171"></span>
+    <span id="statusText">接続確認中…</span>
+  </div>
+</div>
+
+<!-- 選択画面: 入力 or 一覧 -->
+<div id="homeScreen" style="padding:20px 16px">
+  <h2 style="font-size:15px;color:#64748b;text-align:center;margin-bottom:16px;font-weight:600">メニューを選んでください</h2>
+  <div style="display:flex;flex-direction:column;gap:12px">
+    <div onclick="openInput()" style="display:flex;align-items:center;gap:14px;padding:18px 16px;background:#fff;border-radius:14px;box-shadow:0 1px 3px rgba(0,0,0,0.08);border-left:5px solid #14b8a6;cursor:pointer">
+      <div style="width:48px;height:48px;border-radius:12px;display:flex;align-items:center;justify-content:center;font-size:24px;background:#ccfbf1">🌡️</div>
+      <div style="flex:1"><div style="font-size:16px;font-weight:700">健康チェック入力</div><div style="font-size:12px;color:#64748b;margin-top:3px">体温・体調を記録する</div></div>
+      <div style="color:#64748b;font-size:20px">›</div>
+    </div>
+    <div onclick="openList()" style="display:flex;align-items:center;gap:14px;padding:18px 16px;background:#fff;border-radius:14px;box-shadow:0 1px 3px rgba(0,0,0,0.08);border-left:5px solid #2563eb;cursor:pointer">
+      <div style="width:48px;height:48px;border-radius:12px;display:flex;align-items:center;justify-content:center;font-size:24px;background:#dbeafe">📊</div>
+      <div style="flex:1"><div style="font-size:16px;font-weight:700">記録一覧</div><div style="font-size:12px;color:#64748b;margin-top:3px">本日の記録を確認する</div></div>
+      <div style="color:#64748b;font-size:20px">›</div>
+    </div>
+  </div>
+</div>
+
+<!-- 入力画面 -->
+<div id="inputScreen" style="display:none">
+  <div onclick="goHome()" style="display:flex;align-items:center;gap:8px;padding:10px 12px;background:#fff;border-bottom:1px solid #e2e8f0;cursor:pointer">
+    <span style="font-size:18px;color:#14b8a6">‹</span>
+    <span style="font-size:13px;color:#14b8a6;font-weight:600">メニューに戻る</span>
+  </div>
+  <div style="text-align:center;padding:10px;font-size:16px;font-weight:700;color:#0f766e;background:#ccfbf1">🌡️ 健康チェック入力</div>
+
+  <div style="padding:0 12px 20px">
+    <!-- 氏名 -->
+    <div style="background:#fff;border-radius:12px;box-shadow:0 1px 3px rgba(0,0,0,0.08);margin-top:12px;overflow:hidden">
+      <select id="staffSelect" style="width:100%;padding:12px 14px;border:none;font-size:15px;background:#fff;color:#1e293b;appearance:auto">
+        <option value="">👤 氏名を選択…</option>
+      </select>
+    </div>
+
+    <!-- 出勤確認 -->
+    <div style="background:#fff;border-radius:12px;box-shadow:0 1px 3px rgba(0,0,0,0.08);margin-top:12px;overflow:hidden">
+      <div style="padding:12px 14px;font-size:13px;font-weight:700;color:#64748b;border-bottom:1px solid #e2e8f0">出勤確認</div>
+      <div style="display:flex;gap:10px;padding:12px 14px">
+        <button id="att-出勤" onclick="setAttendance('出勤')" style="flex:1;padding:12px;border:2px solid #e2e8f0;border-radius:10px;font-size:15px;font-weight:700;cursor:pointer;background:#fff;color:#64748b">🏢 出勤</button>
+        <button id="att-休み" onclick="setAttendance('休み')" style="flex:1;padding:12px;border:2px solid #e2e8f0;border-radius:10px;font-size:15px;font-weight:700;cursor:pointer;background:#fff;color:#64748b">🏠 休み</button>
+      </div>
+    </div>
+
+    <!-- 体温入力 -->
+    <div id="healthItems" style="display:none">
+      <div style="background:#fff;border-radius:12px;box-shadow:0 1px 3px rgba(0,0,0,0.08);margin-top:12px;overflow:hidden">
+        <div style="padding:12px 14px;font-size:13px;font-weight:700;color:#64748b;border-bottom:1px solid #e2e8f0">🌡️ 体温</div>
+        <div style="padding:16px 14px;text-align:center">
+          <div id="tempDisplay" style="font-size:48px;font-weight:800;color:#1e293b;letter-spacing:2px;min-height:60px;display:flex;align-items:center;justify-content:center">--.-<span style="font-size:24px;margin-left:4px">℃</span></div>
+          <div id="tempAlert" style="margin-top:8px;font-size:13px;font-weight:600;min-height:20px"></div>
+        </div>
+        <!-- テンキーパッド -->
+        <div style="padding:0 14px 14px">
+          <div style="display:grid;grid-template-columns:repeat(3,1fr);gap:8px;max-width:300px;margin:0 auto">
+            <button onclick="tempKey('1')" style="padding:16px;font-size:22px;font-weight:700;border:1px solid #e2e8f0;border-radius:10px;background:#f8fafc;cursor:pointer;color:#1e293b">1</button>
+            <button onclick="tempKey('2')" style="padding:16px;font-size:22px;font-weight:700;border:1px solid #e2e8f0;border-radius:10px;background:#f8fafc;cursor:pointer;color:#1e293b">2</button>
+            <button onclick="tempKey('3')" style="padding:16px;font-size:22px;font-weight:700;border:1px solid #e2e8f0;border-radius:10px;background:#f8fafc;cursor:pointer;color:#1e293b">3</button>
+            <button onclick="tempKey('4')" style="padding:16px;font-size:22px;font-weight:700;border:1px solid #e2e8f0;border-radius:10px;background:#f8fafc;cursor:pointer;color:#1e293b">4</button>
+            <button onclick="tempKey('5')" style="padding:16px;font-size:22px;font-weight:700;border:1px solid #e2e8f0;border-radius:10px;background:#f8fafc;cursor:pointer;color:#1e293b">5</button>
+            <button onclick="tempKey('6')" style="padding:16px;font-size:22px;font-weight:700;border:1px solid #e2e8f0;border-radius:10px;background:#f8fafc;cursor:pointer;color:#1e293b">6</button>
+            <button onclick="tempKey('7')" style="padding:16px;font-size:22px;font-weight:700;border:1px solid #e2e8f0;border-radius:10px;background:#f8fafc;cursor:pointer;color:#1e293b">7</button>
+            <button onclick="tempKey('8')" style="padding:16px;font-size:22px;font-weight:700;border:1px solid #e2e8f0;border-radius:10px;background:#f8fafc;cursor:pointer;color:#1e293b">8</button>
+            <button onclick="tempKey('9')" style="padding:16px;font-size:22px;font-weight:700;border:1px solid #e2e8f0;border-radius:10px;background:#f8fafc;cursor:pointer;color:#1e293b">9</button>
+            <button onclick="tempKey('.')" style="padding:16px;font-size:22px;font-weight:700;border:1px solid #e2e8f0;border-radius:10px;background:#f8fafc;cursor:pointer;color:#1e293b">.</button>
+            <button onclick="tempKey('0')" style="padding:16px;font-size:22px;font-weight:700;border:1px solid #e2e8f0;border-radius:10px;background:#f8fafc;cursor:pointer;color:#1e293b">0</button>
+            <button onclick="tempClear()" style="padding:16px;font-size:18px;font-weight:700;border:1px solid #fecaca;border-radius:10px;background:#fef2f2;cursor:pointer;color:#dc2626">✕</button>
+          </div>
+        </div>
+      </div>
+
+      <!-- 体調チェック -->
+      <div style="background:#fff;border-radius:12px;box-shadow:0 1px 3px rgba(0,0,0,0.08);margin-top:12px;overflow:hidden">
+        <div style="padding:12px 14px;font-size:13px;font-weight:700;color:#64748b;border-bottom:1px solid #e2e8f0">体調チェック</div>
+
+        <div style="display:flex;align-items:center;padding:12px 14px;border-bottom:1px solid #e2e8f0;min-height:52px">
+          <div style="flex:1;font-size:14px">下痢</div>
+          <div style="display:flex;gap:8px">
+            <button id="diarrhea-なし" onclick="setHealth('diarrhea','なし')" style="padding:8px 16px;border:2px solid #e2e8f0;border-radius:8px;font-size:13px;font-weight:700;cursor:pointer;background:#fff;color:#64748b">なし</button>
+            <button id="diarrhea-あり" onclick="setHealth('diarrhea','あり')" style="padding:8px 16px;border:2px solid #e2e8f0;border-radius:8px;font-size:13px;font-weight:700;cursor:pointer;background:#fff;color:#64748b">あり</button>
+          </div>
+        </div>
+
+        <div style="display:flex;align-items:center;padding:12px 14px;border-bottom:1px solid #e2e8f0;min-height:52px">
+          <div style="flex:1;font-size:14px">嘔吐</div>
+          <div style="display:flex;gap:8px">
+            <button id="vomiting-なし" onclick="setHealth('vomiting','なし')" style="padding:8px 16px;border:2px solid #e2e8f0;border-radius:8px;font-size:13px;font-weight:700;cursor:pointer;background:#fff;color:#64748b">なし</button>
+            <button id="vomiting-あり" onclick="setHealth('vomiting','あり')" style="padding:8px 16px;border:2px solid #e2e8f0;border-radius:8px;font-size:13px;font-weight:700;cursor:pointer;background:#fff;color:#64748b">あり</button>
+          </div>
+        </div>
+
+        <div style="display:flex;align-items:center;padding:12px 14px;min-height:52px">
+          <div style="flex:1;font-size:14px">手指の傷</div>
+          <div style="display:flex;gap:8px">
+            <button id="wound-なし" onclick="setHealth('wound','なし')" style="padding:8px 16px;border:2px solid #e2e8f0;border-radius:8px;font-size:13px;font-weight:700;cursor:pointer;background:#fff;color:#64748b">なし</button>
+            <button id="wound-あり" onclick="setHealth('wound','あり')" style="padding:8px 16px;border:2px solid #e2e8f0;border-radius:8px;font-size:13px;font-weight:700;cursor:pointer;background:#fff;color:#64748b">あり</button>
+          </div>
+        </div>
+      </div>
+
+      <!-- 絆創膏（傷ありの時のみ表示） -->
+      <div id="bandaidSection" style="display:none;background:#fff;border-radius:12px;box-shadow:0 1px 3px rgba(0,0,0,0.08);margin-top:12px;overflow:hidden">
+        <div style="padding:12px 14px;font-size:13px;font-weight:700;color:#64748b;border-bottom:1px solid #e2e8f0">🩹 絆創膏</div>
+        <div style="display:flex;align-items:center;padding:12px 14px;gap:10px">
+          <div style="flex:1;font-size:14px">使用数</div>
+          <input id="bandaidCount" type="text" inputmode="numeric" pattern="[0-9]*" placeholder="0" style="width:80px;padding:10px 8px;border:2px solid #e2e8f0;border-radius:8px;font-size:18px;font-weight:600;text-align:center;color:#1e293b">
+          <span style="font-size:14px;color:#64748b">枚</span>
+        </div>
+      </div>
+
+      <!-- 警告バナー -->
+      <div id="alertBanner" style="display:none;margin-top:12px;padding:14px;border-radius:12px;background:#fee2e2;border:2px solid #fecaca">
+        <div style="font-size:15px;font-weight:700;color:#dc2626;text-align:center">⚠️ 上長へ報告してください</div>
+        <div id="alertDetail" style="font-size:13px;color:#dc2626;text-align:center;margin-top:6px"></div>
+      </div>
+
+      <!-- 備考 -->
+      <div style="background:#fff;border-radius:12px;box-shadow:0 1px 3px rgba(0,0,0,0.08);margin-top:12px;overflow:hidden">
+        <div style="padding:12px 14px;font-size:13px;font-weight:700;color:#64748b;border-bottom:1px solid #e2e8f0">💬 備考</div>
+        <textarea id="remarks" style="width:100%;padding:12px 14px;border:none;font-size:14px;resize:vertical;min-height:50px;font-family:inherit;color:#1e293b" placeholder="特記事項があれば入力…"></textarea>
+      </div>
+
+      <button onclick="submitHealth()" style="display:block;width:100%;margin-top:16px;padding:14px;border:none;border-radius:12px;font-size:16px;font-weight:700;color:#fff;cursor:pointer;letter-spacing:1px;background:#14b8a6">送信する</button>
+    </div>
+  </div>
+</div>
+
+<!-- 一覧画面 -->
+<div id="listScreen" style="display:none">
+  <div onclick="goHome()" style="display:flex;align-items:center;gap:8px;padding:10px 12px;background:#fff;border-bottom:1px solid #e2e8f0;cursor:pointer">
+    <span style="font-size:18px;color:#14b8a6">‹</span>
+    <span style="font-size:13px;color:#14b8a6;font-weight:600">メニューに戻る</span>
+  </div>
+  <div style="text-align:center;padding:10px;font-size:16px;font-weight:700;color:#1e40af;background:#dbeafe">📊 記録一覧</div>
+  <div style="display:flex;gap:8px;padding:10px 12px;align-items:center">
+    <input type="date" id="filterDate" style="flex:1;padding:8px 10px;border:1px solid #e2e8f0;border-radius:8px;font-size:14px;color:#1e293b">
+    <button onclick="loadRecords()" style="padding:8px 16px;border:none;border-radius:8px;background:#2563eb;color:#fff;font-size:13px;font-weight:600;cursor:pointer">表示</button>
+  </div>
+  <div id="recordsList" style="padding:0 12px 20px"></div>
+</div>
+
+<div id="loading" style="display:none;position:fixed;top:0;left:0;right:0;bottom:0;background:rgba(255,255,255,0.85);align-items:center;justify-content:center;z-index:200">
+  <div style="width:36px;height:36px;border:3px solid #e2e8f0;border-top-color:#14b8a6;border-radius:50%;animation:spin 0.7s linear infinite"></div>
+</div>
+<div id="toast" style="position:fixed;bottom:30px;left:50%;transform:translateX(-50%);padding:12px 24px;border-radius:10px;color:#fff;font-size:14px;font-weight:600;z-index:300;opacity:0;transition:opacity 0.3s;pointer-events:none"></div>
+
+<script>
+var GAS_URL = "https://script.google.com/macros/s/AKfycbwwuu9adtm9iUexHL8MMz0FtkacnTEhtKmiFkAdQSC-Yw1l3XM0fRwbYnfhjHcqBCGedA/exec";
+
+var state = { attendance: "", temperature: "", diarrhea: "", vomiting: "", wound: "", bandaidCount: "" };
+var tempInput = "";
+
+window.addEventListener("DOMContentLoaded", function() {
+  document.getElementById("filterDate").value = todayStr();
+  loadStaff();
+});
+
+function todayStr() {
+  var d = new Date();
+  return d.getFullYear() + "-" + String(d.getMonth()+1).padStart(2,"0") + "-" + String(d.getDate()).padStart(2,"0");
+}
+
+// 画面遷移
+function goHome() {
+  document.getElementById("homeScreen").style.display = "block";
+  document.getElementById("inputScreen").style.display = "none";
+  document.getElementById("listScreen").style.display = "none";
+  window.scrollTo(0, 0);
+}
+
+function openInput() {
+  document.getElementById("homeScreen").style.display = "none";
+  document.getElementById("inputScreen").style.display = "block";
+  document.getElementById("listScreen").style.display = "none";
+  resetForm();
+  window.scrollTo(0, 0);
+}
+
+function openList() {
+  document.getElementById("homeScreen").style.display = "none";
+  document.getElementById("inputScreen").style.display = "none";
+  document.getElementById("listScreen").style.display = "block";
+  loadRecords();
+  window.scrollTo(0, 0);
+}
+
+// フォームリセット
+function resetForm() {
+  state = { attendance: "", temperature: "", diarrhea: "", vomiting: "", wound: "", bandaidCount: "" };
+  tempInput = "";
+  document.getElementById("staffSelect").value = "";
+  updateAttButtons(); updateHealthButtons(); updateTempDisplay();
+  document.getElementById("healthItems").style.display = "none";
+  document.getElementById("bandaidSection").style.display = "none";
+  document.getElementById("alertBanner").style.display = "none";
+  document.getElementById("remarks").value = "";
+}
+
+// 出勤確認
+function setAttendance(val) {
+  state.attendance = val;
+  updateAttButtons();
+  document.getElementById("healthItems").style.display = val === "出勤" ? "block" : "none";
+}
+
+function updateAttButtons() {
+  var vals = ["出勤", "休み"];
+  vals.forEach(function(v) {
+    var btn = document.getElementById("att-" + v);
+    if (state.attendance === v) {
+      btn.style.background = "#14b8a6"; btn.style.color = "#fff"; btn.style.borderColor = "#14b8a6";
+    } else {
+      btn.style.background = "#fff"; btn.style.color = "#64748b"; btn.style.borderColor = "#e2e8f0";
+    }
+  });
+}
+
+// 体温テンキー
+function tempKey(key) {
+  if (key === "." && tempInput.includes(".")) return;
+  if (tempInput.length >= 4) return;
+  tempInput += key;
+  state.temperature = tempInput;
+  updateTempDisplay();
+  checkAlert();
+}
+
+function tempClear() {
+  tempInput = "";
+  state.temperature = "";
+  updateTempDisplay();
+  checkAlert();
+}
+
+function updateTempDisplay() {
+  var display = document.getElementById("tempDisplay");
+  var alert = document.getElementById("tempAlert");
+  if (!tempInput) {
+    display.innerHTML = '--.-<span style="font-size:24px;margin-left:4px">℃</span>';
+    alert.textContent = "";
+    return;
+  }
+  var temp = parseFloat(tempInput);
+  var color = (temp >= 37.5) ? "#dc2626" : "#16a34a";
+  display.innerHTML = tempInput + '<span style="font-size:24px;margin-left:4px">℃</span>';
+  display.style.color = color;
+
+  if (temp >= 37.5) {
+    alert.style.color = "#dc2626";
+    alert.textContent = "⚠️ 37.5℃以上 ー 上長へ報告してください";
+  } else if (temp > 0) {
+    alert.style.color = "#16a34a";
+    alert.textContent = "✅ 平熱";
+  }
+}
+
+// 体調ボタン
+function setHealth(field, val) {
+  state[field] = val;
+  updateHealthButtons();
+  if (field === "wound") {
+    document.getElementById("bandaidSection").style.display = val === "あり" ? "block" : "none";
+    if (val === "なし") { state.bandaidCount = ""; document.getElementById("bandaidCount").value = ""; }
+  }
+  checkAlert();
+}
+
+function updateHealthButtons() {
+  ["diarrhea", "vomiting", "wound"].forEach(function(field) {
+    ["なし", "あり"].forEach(function(val) {
+      var btn = document.getElementById(field + "-" + val);
+      if (state[field] === val) {
+        if (val === "なし") {
+          btn.style.background = "#dcfce7"; btn.style.color = "#16a34a"; btn.style.borderColor = "#16a34a";
+        } else {
+          btn.style.background = "#fee2e2"; btn.style.color = "#dc2626"; btn.style.borderColor = "#dc2626";
+        }
+      } else {
+        btn.style.background = "#fff"; btn.style.color = "#64748b"; btn.style.borderColor = "#e2e8f0";
+      }
+    });
+  });
+}
+
+// 警告チェック
+function checkAlert() {
+  var reasons = [];
+  var temp = parseFloat(state.temperature);
+  if (temp >= 37.5) reasons.push("体温 " + state.temperature + "℃（37.5℃以上）");
+  if (state.diarrhea === "あり") reasons.push("下痢あり");
+  if (state.vomiting === "あり") reasons.push("嘔吐あり");
+
+  var banner = document.getElementById("alertBanner");
+  if (reasons.length > 0) {
+    banner.style.display = "block";
+    document.getElementById("alertDetail").textContent = reasons.join(" / ");
+  } else {
+    banner.style.display = "none";
+  }
+}
+
+// スタッフ読み込み
+async function loadStaff() {
+  if (GAS_URL === "YOUR_GAS_URL_HERE") {
+    document.getElementById("statusDot").style.background = "#f87171";
+    document.getElementById("statusText").textContent = "未接続";
+    return;
+  }
+  try {
+    var res = await fetch(GAS_URL + "?action=getStaff");
+    var data = await res.json();
+    if (data.success) {
+      var sel = document.getElementById("staffSelect");
+      sel.innerHTML = '<option value="">👤 氏名を選択…</option>';
+      data.staff.forEach(function(s) { sel.innerHTML += '<option value="' + s + '">' + s + '</option>'; });
+      document.getElementById("statusDot").style.background = "#4ade80";
+      document.getElementById("statusText").textContent = "スプシ連携中";
+    }
+  } catch (e) {
+    document.getElementById("statusDot").style.background = "#f87171";
+    document.getElementById("statusText").textContent = "未接続";
+  }
+}
+
+// 送信
+async function submitHealth() {
+  var staff = document.getElementById("staffSelect").value;
+  if (!staff) { showToast("氏名を選択してください", "#dc2626"); return; }
+  if (!state.attendance) { showToast("出勤確認を選択してください", "#dc2626"); return; }
+
+  if (state.attendance === "出勤") {
+    if (!state.temperature) { showToast("体温を入力してください", "#dc2626"); return; }
+    if (!state.diarrhea) { showToast("下痢の有無を選択してください", "#dc2626"); return; }
+    if (!state.vomiting) { showToast("嘔吐の有無を選択してください", "#dc2626"); return; }
+    if (!state.wound) { showToast("手指の傷の有無を選択してください", "#dc2626"); return; }
+    if (state.wound === "あり") {
+      state.bandaidCount = document.getElementById("bandaidCount").value;
+    }
+  }
+
+  showLoading(true);
+  try {
+    var res = await fetch(GAS_URL, {
+      method: "POST",
+      body: JSON.stringify({
+        action: "submitHealth",
+        staffName: staff,
+        attendance: state.attendance,
+        temperature: state.attendance === "出勤" ? state.temperature : "",
+        diarrhea: state.attendance === "出勤" ? state.diarrhea : "",
+        vomiting: state.attendance === "出勤" ? state.vomiting : "",
+        wound: state.attendance === "出勤" ? state.wound : "",
+        bandaidCount: state.bandaidCount,
+        remarks: document.getElementById("remarks").value
+      })
+    });
+    var data = await res.json();
+    if (data.success) {
+      showToast(data.message, "#16a34a");
+      resetForm();
+    } else { showToast("エラー: " + data.error, "#dc2626"); }
+  } catch (e) { showToast("通信エラー", "#dc2626"); }
+  showLoading(false);
+}
+
+// 一覧
+async function loadRecords() {
+  var dateVal = document.getElementById("filterDate").value;
+  var container = document.getElementById("recordsList");
+  showLoading(true);
+  try {
+    var url = GAS_URL + "?action=getRecords&date=" + dateVal;
+    var res = await fetch(url); var data = await res.json();
+    if (!data.success || data.records.length === 0) {
+      container.innerHTML = '<div style="text-align:center;padding:40px 20px;color:#64748b;font-size:14px">📭 記録がありません</div>';
+      showLoading(false); return;
+    }
+    var html = "";
+    data.records.forEach(function(rec) {
+      var row = rec.data;
+      var needReport = row[9] === "要報告";
+      var borderColor = needReport ? "#dc2626" : "#e2e8f0";
+      html += '<div style="background:#fff;border-radius:10px;box-shadow:0 1px 3px rgba(0,0,0,0.08);margin:10px 0;overflow:hidden;border-left:4px solid ' + borderColor + '">';
+      html += '<div style="display:flex;justify-content:space-between;align-items:center;padding:10px 14px;background:' + (needReport ? "#fef2f2" : "#f5f6fa") + ';border-bottom:1px solid #e2e8f0">';
+      html += '<div><span style="font-size:13px;font-weight:600">' + (row[1]||"") + '</span>';
+      if (needReport) html += ' <span style="font-size:11px;color:#dc2626;font-weight:700">⚠️要報告</span>';
+      html += '<br><span style="font-size:11px;color:#64748b">' + (row[0]||"") + '</span></div>';
+      html += '<button onclick="deleteRecord(' + rec.rowIndex + ')" style="padding:4px 10px;border:1px solid #dc2626;border-radius:6px;background:none;color:#dc2626;font-size:11px;cursor:pointer">削除</button>';
+      html += '</div><div style="padding:8px 14px">';
+      // 出勤・体温・下痢・嘔吐・手指の傷・絆創膏
+      for (var i = 2; i < data.headers.length; i++) {
+        var h = data.headers[i]; var v = row[i] || "";
+        if (!h || h === "備考" || !v) continue;
+        var vc = v === "×" || v === "要報告" || v === "あり" ? "#dc2626" : v === "○" || v === "なし" ? "#16a34a" : "#1e293b";
+        html += '<div style="display:flex;justify-content:space-between;padding:4px 0;font-size:13px;border-bottom:1px solid #f1f5f9"><span style="color:#64748b;flex:1">' + h + '</span><span style="font-weight:600;color:' + vc + '">' + v + '</span></div>';
+      }
+      var ri = data.headers.indexOf("備考");
+      if (ri >= 0 && row[ri]) html += '<div style="display:flex;justify-content:space-between;padding:4px 0;font-size:13px"><span style="color:#64748b;flex:1">備考</span><span style="font-weight:600">' + row[ri] + '</span></div>';
+      html += '</div></div>';
+    });
+    container.innerHTML = html;
+  } catch (e) { container.innerHTML = '<div style="text-align:center;padding:40px 20px;color:#64748b">⚠️ 読み込みエラー</div>'; }
+  showLoading(false);
+}
+
+async function deleteRecord(rowIndex) {
+  if (!confirm("この記録を削除しますか？")) return;
+  showLoading(true);
+  try {
+    var res = await fetch(GAS_URL, {method:"POST", body:JSON.stringify({action:"deleteRecord",rowIndex:rowIndex})});
+    var data = await res.json();
+    if (data.success) { showToast("削除しました", "#16a34a"); loadRecords(); }
+    else { showToast("エラー: " + data.error, "#dc2626"); }
+  } catch (e) { showToast("通信エラー", "#dc2626"); }
+  showLoading(false);
+}
+
+function showLoading(show) { document.getElementById("loading").style.display = show ? "flex" : "none"; }
+function showToast(msg, color) {
+  var t = document.getElementById("toast"); t.textContent = msg; t.style.background = color; t.style.opacity = "1";
+  setTimeout(function() { t.style.opacity = "0"; }, 2500);
+}
+</script>
+</body>
+</html>
