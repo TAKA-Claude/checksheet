@@ -309,6 +309,7 @@ function toggleCheck(sheet, id) {
 function setOx(sheet, id, val) {
   checkState[sheet][id].ox = (checkState[sheet][id].ox === val) ? "" : val;
   renderCheckItems(sheet);
+  if (ITEMS[sheet].isChlorine) updateJudgment();
 }
 
 function checkAll() {
@@ -348,15 +349,20 @@ function updateJudgment() {
   if (!checkState.chlorine) return;
   var concVal = checkState.chlorine.cl01.value;
   var oxIds = ["cl02","cl03","cl04","cl05"];
-  var allOx = oxIds.every(function(id) { return checkState.chlorine[id].ox === "○"; });
-  if (!concVal) {
-    box.style.background = "#f1f5f9"; box.style.color = "#64748b"; box.textContent = "💧 濃度を選択してください";
-  } else if (parseFloat(concVal) >= 0.1 && allOx) {
+  var allFilled = concVal && oxIds.every(function(id) { return checkState.chlorine[id].ox !== ""; });
+  if (!allFilled) {
+    box.style.background = "#f1f5f9"; box.style.color = "#64748b"; box.textContent = "💧 全項目を入力すると判定が表示されます";
+    return;
+  }
+  var conc = parseFloat(concVal);
+  var hasNg = oxIds.some(function(id) { return checkState.chlorine[id].ox === "×"; });
+  var outOfRange = conc < 0.1 || conc > 1.0;
+  if (!outOfRange && !hasNg) {
     box.style.background = "#dcfce7"; box.style.color = "#16a34a"; box.textContent = "✅ 判定：適合（" + concVal + " mg/L）";
   } else {
     box.style.background = "#fee2e2"; box.style.color = "#dc2626";
-    var r = []; if (parseFloat(concVal) < 0.1) r.push("濃度不足"); if (!allOx) r.push("官能検査に×あり");
-    box.textContent = "❌ 判定：不適合（" + r.join("・") + "）";
+    var r = []; if (outOfRange) r.push("濃度が基準外"); if (hasNg) r.push("官能検査に×あり");
+    box.textContent = "❌ 判定：不適合（" + r.join("・") + "）｜ 上長へ報告してください";
   }
 }
 
@@ -395,7 +401,7 @@ async function submitCheck() {
     if (oxIds.some(function(id) { return !checkState.chlorine[id].ox; })) { showToast("官能検査を全て選択してください", "#dc2626"); return; }
     var conc = parseFloat(checkState.chlorine.cl01.value);
     var allOx = oxIds.every(function(id) { return checkState.chlorine[id].ox === "○"; });
-    items.push({label:"判定", type:"text", value:(conc >= 0.1 && allOx) ? "適合" : "不適合"});
+    items.push({label:"判定", type:"text", value:(conc >= 0.1 && conc <= 1.0 && allOx) ? "適合" : "不適合"});
   } else {
     var unc = items.filter(function(i) { return i.type === "check" && !i.done; }).length;
     if (unc > 0 && !confirm(unc + "件が未チェックです。このまま送信しますか？")) return;
