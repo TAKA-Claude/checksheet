@@ -261,13 +261,13 @@ function updateTempDisplay() {
     return;
   }
   var temp = parseFloat(tempInput);
-  var color = (temp >= 37.5) ? "#dc2626" : "#16a34a";
+  var color = (temp >= 37.0) ? "#dc2626" : "#16a34a";
   display.innerHTML = tempInput + '<span style="font-size:24px;margin-left:4px">℃</span>';
   display.style.color = color;
 
-  if (temp >= 37.5) {
+  if (temp >= 37.0) {
     alert.style.color = "#dc2626";
-    alert.textContent = "⚠️ 37.5℃以上 ー 上長へ報告してください";
+    alert.textContent = "⚠️ 37.0℃以上 ー 上長へ報告してください";
   } else if (temp > 0) {
     alert.style.color = "#16a34a";
     alert.textContent = "✅ 平熱";
@@ -306,7 +306,7 @@ function updateHealthButtons() {
 function checkAlert() {
   var reasons = [];
   var temp = parseFloat(state.temperature);
-  if (temp >= 37.5) reasons.push("体温 " + state.temperature + "℃（37.5℃以上）");
+  if (temp >= 37.0) reasons.push("体温 " + state.temperature + "℃（37.0℃以上）");
   if (state.diarrhea === "あり") reasons.push("下痢あり");
   if (state.vomiting === "あり") reasons.push("嘔吐あり");
 
