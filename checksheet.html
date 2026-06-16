@@ -307,10 +307,10 @@
 </div>
 
 <!-- ========== 選択画面 ========== -->
-<div id="selectScreen" class="select-screen">
-  <h2>確認するシートを選んでください</h2>
-  <div class="select-grid">
-    <div class="select-card type-before" onclick="openForm('before')">
+<div id="selectScreen" class="select-screen" style="display:block !important; padding:20px 16px; visibility:visible !important; opacity:1 !important; height:auto !important; overflow:visible !important;">
+  <h2 style="display:block; visibility:visible;">確認するシートを選んでください</h2>
+  <div class="select-grid" style="display:flex !important; flex-direction:column; gap:12px; visibility:visible !important;">
+    <div class="select-card type-before" onclick="openForm('before')" style="display:flex !important; visibility:visible !important; min-height:48px;">
       <div class="icon">🌅</div>
       <div class="info">
         <div class="name">① 作業前確認</div>
@@ -318,7 +318,7 @@
       </div>
       <div class="arrow">›</div>
     </div>
-    <div class="select-card type-chlorine" onclick="openForm('chlorine')">
+    <div class="select-card type-chlorine" onclick="openForm('chlorine')" style="display:flex !important; visibility:visible !important; min-height:48px;">
       <div class="icon">💧</div>
       <div class="info">
         <div class="name">② 残留塩素確認</div>
@@ -326,7 +326,7 @@
       </div>
       <div class="arrow">›</div>
     </div>
-    <div class="select-card type-final" onclick="openForm('final')">
+    <div class="select-card type-final" onclick="openForm('final')" style="display:flex !important; visibility:visible !important; min-height:48px;">
       <div class="icon">🌙</div>
       <div class="info">
         <div class="name">③ 最終確認</div>
@@ -334,7 +334,7 @@
       </div>
       <div class="arrow">›</div>
     </div>
-    <div class="select-card type-clean" onclick="openForm('clean')">
+    <div class="select-card type-clean" onclick="openForm('clean')" style="display:flex !important; visibility:visible !important; min-height:48px;">
       <div class="icon">🧹</div>
       <div class="info">
         <div class="name">④ 清掃確認</div>
@@ -343,7 +343,7 @@
       <div class="arrow">›</div>
     </div>
   </div>
-  <div class="list-link" onclick="openList()">📊 記録一覧を見る</div>
+  <div class="list-link" onclick="openList()" style="display:block !important; visibility:visible !important;">📊 記録一覧を見る</div>
 </div>
 
 <!-- ========== 入力画面 ========== -->
