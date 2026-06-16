@@ -1,0 +1,901 @@
+<!DOCTYPE html>
+<html lang="ja">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0, user-scalable=no">
+<title>GX 浜松CK チェックシート</title>
+<style>
+  :root {
+    --bg: #f5f6fa;
+    --card: #ffffff;
+    --primary: #2563eb;
+    --primary-light: #dbeafe;
+    --success: #16a34a;
+    --success-light: #dcfce7;
+    --danger: #dc2626;
+    --danger-light: #fee2e2;
+    --orange: #ea580c;
+    --orange-light: #fff7ed;
+    --cyan: #0891b2;
+    --cyan-light: #cffafe;
+    --text: #1e293b;
+    --text-sub: #64748b;
+    --border: #e2e8f0;
+    --shadow: 0 1px 3px rgba(0,0,0,0.08);
+  }
+  * { margin: 0; padding: 0; box-sizing: border-box; }
+  body {
+    font-family: -apple-system, BlinkMacSystemFont, "Hiragino Sans", "Hiragino Kaku Gothic ProN", Meiryo, sans-serif;
+    background: var(--bg);
+    color: var(--text);
+    font-size: 15px;
+    padding-bottom: 80px;
+    -webkit-text-size-adjust: 100%;
+  }
+
+  .header {
+    background: linear-gradient(135deg, #1e40af, #2563eb);
+    color: #fff;
+    padding: 14px 16px;
+    text-align: center;
+    position: sticky;
+    top: 0;
+    z-index: 100;
+    box-shadow: 0 2px 8px rgba(37,99,235,0.3);
+  }
+  .header h1 { font-size: 17px; font-weight: 700; letter-spacing: 0.5px; }
+  .header .status {
+    font-size: 11px; margin-top: 3px;
+    display: flex; align-items: center; justify-content: center; gap: 5px;
+  }
+  .header .dot { width: 7px; height: 7px; border-radius: 50%; display: inline-block; }
+  .dot.green { background: #4ade80; }
+  .dot.red { background: #f87171; }
+
+  /* 選択画面 */
+  .select-screen { padding: 20px 16px; }
+  .select-screen h2 {
+    font-size: 15px; color: var(--text-sub); text-align: center;
+    margin-bottom: 16px; font-weight: 600;
+  }
+  .select-grid { display: flex; flex-direction: column; gap: 12px; }
+  .select-card {
+    display: flex; align-items: center; gap: 14px;
+    padding: 18px 16px; background: var(--card); border-radius: 14px;
+    box-shadow: var(--shadow); border-left: 5px solid transparent;
+    cursor: pointer; transition: all 0.2s; -webkit-tap-highlight-color: transparent;
+  }
+  .select-card:active { transform: scale(0.98); }
+  .select-card.type-before { border-left-color: var(--primary); }
+  .select-card.type-chlorine { border-left-color: var(--cyan); }
+  .select-card.type-final { border-left-color: var(--orange); }
+  .select-card.type-clean { border-left-color: var(--success); }
+  .select-card .icon {
+    width: 48px; height: 48px; border-radius: 12px;
+    display: flex; align-items: center; justify-content: center;
+    font-size: 24px; flex-shrink: 0;
+  }
+  .select-card.type-before .icon { background: var(--primary-light); }
+  .select-card.type-chlorine .icon { background: var(--cyan-light); }
+  .select-card.type-final .icon { background: var(--orange-light); }
+  .select-card.type-clean .icon { background: var(--success-light); }
+  .select-card .info { flex: 1; }
+  .select-card .info .name { font-size: 16px; font-weight: 700; }
+  .select-card .info .desc { font-size: 12px; color: var(--text-sub); margin-top: 3px; }
+  .select-card .arrow { color: var(--text-sub); font-size: 20px; }
+  .list-link {
+    display: block; text-align: center; margin-top: 20px; padding: 12px;
+    background: var(--card); border-radius: 12px; box-shadow: var(--shadow);
+    font-size: 14px; font-weight: 600; color: var(--primary);
+    cursor: pointer; text-decoration: none;
+  }
+
+  /* 入力画面 */
+  .form-screen { display: none; }
+  .back-bar {
+    display: flex; align-items: center; gap: 8px;
+    padding: 10px 12px; background: var(--card);
+    border-bottom: 1px solid var(--border);
+    cursor: pointer; -webkit-tap-highlight-color: transparent;
+  }
+  .back-bar .back-arrow { font-size: 18px; color: var(--primary); }
+  .back-bar .back-label { font-size: 13px; color: var(--primary); font-weight: 600; }
+  .form-type-badge {
+    text-align: center; padding: 10px;
+    font-size: 16px; font-weight: 700; letter-spacing: 0.5px;
+  }
+  .form-type-badge.type-before { color: var(--primary); background: var(--primary-light); }
+  .form-type-badge.type-chlorine { color: var(--cyan); background: var(--cyan-light); }
+  .form-type-badge.type-final { color: var(--orange); background: var(--orange-light); }
+  .form-type-badge.type-clean { color: var(--success); background: var(--success-light); }
+
+  .content { padding: 0 12px 20px; }
+  .card {
+    background: var(--card); border-radius: 12px;
+    box-shadow: var(--shadow); margin-top: 12px; overflow: hidden;
+  }
+  .card-title {
+    padding: 12px 14px; font-size: 13px; font-weight: 700;
+    color: var(--text-sub); border-bottom: 1px solid var(--border);
+  }
+  .staff-select {
+    width: 100%; padding: 12px 14px; border: none;
+    border-bottom: 1px solid var(--border); font-size: 15px;
+    background: var(--card); color: var(--text);
+    appearance: none; -webkit-appearance: none;
+    background-image: url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' width='12' height='12' viewBox='0 0 12 12'%3E%3Cpath fill='%2364748b' d='M6 8L1 3h10z'/%3E%3C/svg%3E");
+    background-repeat: no-repeat; background-position: right 14px center;
+  }
+
+  .check-section-label { padding: 8px 14px; font-size: 12px; font-weight: 700; color: #fff; }
+  .area-toilet { background: #7c3aed; }
+  .area-hallway { background: #0891b2; }
+  .area-kitchen { background: #c2410c; }
+  .area-processing { background: #15803d; }
+  .area-break { background: #b45309; }
+
+  .check-item {
+    display: flex; align-items: center; padding: 10px 14px;
+    border-bottom: 1px solid var(--border); gap: 10px; min-height: 48px;
+  }
+  .check-item:last-child { border-bottom: none; }
+  .check-item .label { flex: 1; font-size: 14px; line-height: 1.4; }
+  .check-item .label .note { display: block; font-size: 11px; color: var(--text-sub); margin-top: 2px; }
+  .check-item .controls { display: flex; align-items: center; gap: 8px; flex-shrink: 0; }
+
+  .cb {
+    width: 28px; height: 28px; border: 2px solid var(--border); border-radius: 6px;
+    display: flex; align-items: center; justify-content: center;
+    cursor: pointer; transition: all 0.15s; flex-shrink: 0;
+    -webkit-tap-highlight-color: transparent;
+  }
+  .cb.checked { background: var(--success); border-color: var(--success); }
+  .cb.checked::after { content: "✓"; color: #fff; font-size: 16px; font-weight: 700; }
+
+  .tantou-mini {
+    width: 50px; padding: 4px 6px; border: 1px solid var(--border);
+    border-radius: 6px; font-size: 12px; text-align: center; color: var(--text);
+  }
+  .tantou-mini::placeholder { color: #cbd5e1; }
+
+  .num-input {
+    width: 80px; padding: 6px 8px; border: 1px solid var(--border);
+    border-radius: 6px; font-size: 14px; text-align: right; color: var(--text);
+  }
+
+  /* プルダウン */
+  .select-input {
+    padding: 6px 8px; border: 1px solid var(--border); border-radius: 6px;
+    font-size: 14px; color: var(--text); background: var(--card);
+    appearance: auto; -webkit-appearance: auto;
+  }
+
+  /* ○×トグル */
+  .ox-toggle {
+    width: 36px; height: 28px; border: 2px solid var(--border); border-radius: 6px;
+    display: flex; align-items: center; justify-content: center;
+    cursor: pointer; font-size: 14px; font-weight: 700;
+    transition: all 0.15s; -webkit-tap-highlight-color: transparent;
+    color: var(--text-sub); background: var(--card);
+  }
+  .ox-toggle.ok { background: var(--success-light); border-color: var(--success); color: var(--success); }
+  .ox-toggle.ng { background: var(--danger-light); border-color: var(--danger); color: var(--danger); }
+
+  .remarks-area {
+    width: 100%; padding: 12px 14px; border: none; font-size: 14px;
+    resize: vertical; min-height: 60px; font-family: inherit; color: var(--text);
+  }
+  .bulk-bar {
+    display: flex; gap: 8px; padding: 10px 14px; border-bottom: 1px solid var(--border);
+  }
+  .bulk-btn {
+    padding: 6px 12px; border-radius: 6px; border: 1px solid var(--border);
+    font-size: 12px; font-weight: 600; cursor: pointer;
+    background: var(--card); color: var(--text-sub);
+  }
+  .bulk-btn:active { background: var(--bg); }
+
+  .submit-btn {
+    display: block; width: calc(100% - 24px); margin: 16px auto 0;
+    padding: 14px; border: none; border-radius: 12px;
+    font-size: 16px; font-weight: 700; color: #fff;
+    cursor: pointer; transition: all 0.2s; letter-spacing: 1px;
+  }
+  .submit-btn.type-before { background: var(--primary); }
+  .submit-btn.type-chlorine { background: var(--cyan); }
+  .submit-btn.type-final { background: var(--orange); }
+  .submit-btn.type-clean { background: var(--success); }
+  .submit-btn:active { transform: scale(0.98); opacity: 0.9; }
+  .submit-btn:disabled { opacity: 0.5; }
+
+  .incomplete-banner {
+    margin: 12px 12px 0; padding: 10px 14px; border-radius: 10px;
+    font-size: 13px; font-weight: 600; display: none; align-items: center; gap: 8px;
+  }
+  .incomplete-banner.all-done { background: var(--success-light); color: var(--success); display: flex; }
+  .incomplete-banner.has-incomplete { background: var(--danger-light); color: var(--danger); display: flex; }
+
+  /* 残留塩素 判定表示 */
+  .judgment-box {
+    margin: 0 14px 10px; padding: 12px; border-radius: 10px;
+    font-size: 15px; font-weight: 700; text-align: center;
+  }
+  .judgment-box.pass { background: var(--success-light); color: var(--success); }
+  .judgment-box.fail { background: var(--danger-light); color: var(--danger); }
+  .judgment-box.pending { background: #f1f5f9; color: var(--text-sub); }
+
+  /* 一覧画面 */
+  .list-screen { display: none; }
+  .sheet-tabs { display: flex; gap: 6px; padding: 10px 12px; overflow-x: auto; }
+  .sheet-tab {
+    flex-shrink: 0; padding: 7px 14px; border-radius: 20px;
+    font-size: 13px; font-weight: 600; border: 2px solid var(--border);
+    background: var(--card); color: var(--text-sub);
+    cursor: pointer; transition: all 0.2s; white-space: nowrap;
+  }
+  .sheet-tab.active-before { background: var(--primary); color: #fff; border-color: var(--primary); }
+  .sheet-tab.active-chlorine { background: var(--cyan); color: #fff; border-color: var(--cyan); }
+  .sheet-tab.active-final { background: var(--orange); color: #fff; border-color: var(--orange); }
+  .sheet-tab.active-clean { background: var(--success); color: #fff; border-color: var(--success); }
+
+  .filter-bar { display: flex; gap: 8px; padding: 10px 12px; align-items: center; }
+  .filter-bar input[type="date"] {
+    flex: 1; padding: 8px 10px; border: 1px solid var(--border);
+    border-radius: 8px; font-size: 14px; color: var(--text);
+  }
+  .filter-btn {
+    padding: 8px 16px; border: none; border-radius: 8px;
+    background: var(--primary); color: #fff; font-size: 13px; font-weight: 600; cursor: pointer;
+  }
+  .record-card {
+    background: var(--card); border-radius: 10px;
+    box-shadow: var(--shadow); margin: 10px 0; overflow: hidden;
+  }
+  .record-header {
+    display: flex; justify-content: space-between; align-items: center;
+    padding: 10px 14px; background: var(--bg); border-bottom: 1px solid var(--border);
+  }
+  .record-header .datetime { font-size: 13px; font-weight: 600; }
+  .record-header .staff-name { font-size: 12px; color: var(--text-sub); }
+  .record-body { padding: 8px 14px; }
+  .record-row {
+    display: flex; justify-content: space-between; padding: 4px 0;
+    font-size: 13px; border-bottom: 1px solid #f1f5f9;
+  }
+  .record-row:last-child { border-bottom: none; }
+  .record-row .rlabel { color: var(--text-sub); flex: 1; }
+  .record-row .rval { font-weight: 600; text-align: right; }
+  .record-row .rval.done { color: var(--success); }
+  .record-row .rval.not-done { color: var(--danger); }
+  .del-btn {
+    padding: 4px 10px; border: 1px solid var(--danger); border-radius: 6px;
+    background: none; color: var(--danger); font-size: 11px; cursor: pointer;
+  }
+  .empty-msg { text-align: center; padding: 40px 20px; color: var(--text-sub); font-size: 14px; }
+
+  .loading-overlay {
+    position: fixed; top: 0; left: 0; right: 0; bottom: 0;
+    background: rgba(255,255,255,0.85); display: none;
+    align-items: center; justify-content: center; z-index: 200;
+  }
+  .loading-overlay .spinner {
+    width: 36px; height: 36px; border: 3px solid var(--border);
+    border-top-color: var(--primary); border-radius: 50%;
+    animation: spin 0.7s linear infinite;
+  }
+  @keyframes spin { to { transform: rotate(360deg); } }
+
+  .toast {
+    position: fixed; bottom: 30px; left: 50%; transform: translateX(-50%);
+    padding: 12px 24px; border-radius: 10px; color: #fff;
+    font-size: 14px; font-weight: 600; z-index: 300;
+    opacity: 0; transition: opacity 0.3s; pointer-events: none;
+  }
+  .toast.show { opacity: 1; }
+  .toast.success { background: var(--success); }
+  .toast.error { background: var(--danger); }
+</style>
+</head>
+<body>
+
+<div class="header">
+  <h1>📋 GX 浜松CK チェックシート</h1>
+  <div class="status">
+    <span class="dot" id="statusDot"></span>
+    <span id="statusText">接続確認中…</span>
+  </div>
+</div>
+
+<!-- ========== 選択画面 ========== -->
+<div id="selectScreen" class="select-screen">
+  <h2>確認するシートを選んでください</h2>
+  <div class="select-grid">
+    <div class="select-card type-before" onclick="openForm('before')">
+      <div class="icon">🌅</div>
+      <div class="info">
+        <div class="name">① 作業前確認</div>
+        <div class="desc">15項目 ｜ 通電・外回り・衛生チェック</div>
+      </div>
+      <div class="arrow">›</div>
+    </div>
+    <div class="select-card type-chlorine" onclick="openForm('chlorine')">
+      <div class="icon">💧</div>
+      <div class="info">
+        <div class="name">② 残留塩素確認</div>
+        <div class="desc">水質検査 ｜ 濃度・官能検査（色・臭い・味・濁り）</div>
+      </div>
+      <div class="arrow">›</div>
+    </div>
+    <div class="select-card type-final" onclick="openForm('final')">
+      <div class="icon">🌙</div>
+      <div class="info">
+        <div class="name">③ 最終確認</div>
+        <div class="desc">28項目 ｜ 電源OFF・施錠・使用量記録</div>
+      </div>
+      <div class="arrow">›</div>
+    </div>
+    <div class="select-card type-clean" onclick="openForm('clean')">
+      <div class="icon">🧹</div>
+      <div class="info">
+        <div class="name">④ 清掃確認</div>
+        <div class="desc">21項目 ｜ トイレ・廊下・厨房・加工室・休憩室</div>
+      </div>
+      <div class="arrow">›</div>
+    </div>
+  </div>
+  <div class="list-link" onclick="openList()">📊 記録一覧を見る</div>
+</div>
+
+<!-- ========== 入力画面 ========== -->
+<div id="formScreen" class="form-screen">
+  <div class="back-bar" onclick="goHome()">
+    <span class="back-arrow">‹</span>
+    <span class="back-label">シート選択に戻る</span>
+  </div>
+  <div id="formTypeBadge" class="form-type-badge"></div>
+  <div id="incompleteBanner" class="incomplete-banner"></div>
+
+  <div class="content">
+    <div class="card">
+      <select id="staffSelect" class="staff-select">
+        <option value="">👤 担当者を選択…</option>
+      </select>
+    </div>
+
+    <div class="card">
+      <div class="card-title" id="sheetTitle"></div>
+      <div id="bulkBar" class="bulk-bar">
+        <button class="bulk-btn" onclick="checkAll()">✓ 全てチェック</button>
+        <button class="bulk-btn" onclick="uncheckAll()">✕ 全て解除</button>
+      </div>
+      <div id="checkItems"></div>
+    </div>
+
+    <!-- 残留塩素 判定表示 -->
+    <div id="judgmentBox" class="judgment-box pending" style="display:none;">
+      濃度を選択してください
+    </div>
+
+    <div class="card">
+      <div class="card-title">💬 備考 / 修正措置</div>
+      <textarea id="remarks" class="remarks-area" placeholder="特記事項・修正措置があれば入力…"></textarea>
+    </div>
+
+    <button id="submitBtn" class="submit-btn" onclick="submitCheck()">送信する</button>
+  </div>
+</div>
+
+<!-- ========== 一覧画面 ========== -->
+<div id="listScreen" class="list-screen">
+  <div class="back-bar" onclick="goHome()">
+    <span class="back-arrow">‹</span>
+    <span class="back-label">シート選択に戻る</span>
+  </div>
+  <div class="sheet-tabs">
+    <button class="sheet-tab active-before" data-sheet-list="before" onclick="switchSheetList('before')">🌅 作業前</button>
+    <button class="sheet-tab" data-sheet-list="chlorine" onclick="switchSheetList('chlorine')">💧 残留塩素</button>
+    <button class="sheet-tab" data-sheet-list="final" onclick="switchSheetList('final')">🌙 最終確認</button>
+    <button class="sheet-tab" data-sheet-list="clean" onclick="switchSheetList('clean')">🧹 清掃</button>
+  </div>
+  <div class="filter-bar">
+    <input type="date" id="filterDate">
+    <button class="filter-btn" onclick="loadRecords()">表示</button>
+  </div>
+  <div class="content" id="recordsList"></div>
+</div>
+
+<div class="loading-overlay" id="loading"><div class="spinner"></div></div>
+<div class="toast" id="toast"></div>
+
+<script>
+const GAS_URL = "https://script.google.com/macros/s/AKfycbyA6yJEw2zf2m9NBS3dBHcH-nompriUzYDWbd4eZL_bZCzaXfGRxCxGVG5lDicI9HjW/exec";
+
+// 残留塩素プルダウン選択肢
+const CHLORINE_OPTIONS = [];
+for (let v = 0.1; v <= 2.0; v = Math.round((v + 0.1) * 10) / 10) {
+  CHLORINE_OPTIONS.push(v.toFixed(1));
+}
+
+const ITEMS = {
+  before: {
+    title: "🌅 作業前確認チェックシート",
+    badge: "① 作業前確認",
+    hasTantou: false,
+    isChlorine: false,
+    sections: [
+      { label: null, items: [
+        { id: "b01", text: "冷凍庫（雷神）通電チェック", type: "check" },
+        { id: "b02", text: "冷蔵庫（風神）通電チェック", type: "check" },
+        { id: "b03", text: "温度っちのランプは青色か", type: "check" },
+        { id: "b04", text: "水たまり、雑草の確認", type: "check" },
+        { id: "b05", text: "外壁の破損、隙間はないか", type: "check" },
+        { id: "b06", text: "鳥の巣は作られていないか", type: "check" },
+        { id: "b07", text: "廃棄物置き場は清潔か", type: "check" },
+        { id: "b08", text: "郵便BOX 確認", type: "check" },
+        { id: "b09", text: "健康チェックシートに未記載の人はいないか", type: "check" },
+        { id: "b10", text: "マットに除菌液をかける（2枚）", type: "check" },
+        { id: "b11", text: "水質検査を行う（残留塩素チェック）", type: "check" },
+        { id: "b12", text: "テント（しげお）内に虫の発生はないか", type: "check" },
+        { id: "b13", text: "薬品BOXの安全確認", type: "check" },
+        { id: "b14", text: "休憩室のエアコンは消えているか", type: "check" },
+        { id: "b15", text: "休憩室の鍵は閉まっているか", type: "check" },
+      ]}
+    ]
+  },
+  chlorine: {
+    title: "💧 残留塩素確認（水質検査記録）",
+    badge: "② 残留塩素確認",
+    hasTantou: false,
+    isChlorine: true,
+    sections: [
+      { label: null, items: [
+        { id: "cl01", text: "残留塩素濃度", type: "select", note: "基準値: 0.1 mg/L 以上" },
+        { id: "cl02", text: "色", type: "ox" },
+        { id: "cl03", text: "臭い", type: "ox" },
+        { id: "cl04", text: "味", type: "ox" },
+        { id: "cl05", text: "濁り", type: "ox" },
+      ]}
+    ]
+  },
+  final: {
+    title: "🌙 最終確認チェックシート",
+    badge: "③ 最終確認",
+    hasTantou: true,
+    isChlorine: false,
+    sections: [
+      { label: null, items: [
+        { id: "f01", text: "ガス元栓OFF（スープケトル）", type: "check" },
+        { id: "f02", text: "ガス＆電源OFF（撹拌機2号）", type: "check" },
+        { id: "f03", text: "ガス＆電源OFF（撹拌機3号）", type: "check" },
+        { id: "f04", text: "換気口（シャラシャラ）閉鎖", type: "check" },
+        { id: "f05", text: "シーラー 電源OFF", type: "check" },
+        { id: "f06", text: "全IHコンロ、電源OFF", type: "check" },
+        { id: "f07", text: "全換気扇、エアコン電源OFF", type: "check" },
+        { id: "f08", text: "ティファール電源OFF", type: "check" },
+        { id: "f09", text: "ラジオOFF", type: "check" },
+        { id: "f10", text: "まな板殺菌庫 ON、タイマー、スタート", type: "check" },
+        { id: "f11", text: "蛇口（ちゃんと閉めた？）チェック", type: "check" },
+        { id: "f12", text: "各シンク 洗剤、アルコール、ペーパー補充OK？", type: "check" },
+        { id: "f13", text: "冷凍庫（雷神）通電チェック", type: "check" },
+        { id: "f14", text: "冷蔵庫（風神）通電チェック", type: "check" },
+        { id: "f15", text: "温度っちのランプは青色か", type: "check" },
+        { id: "f16", text: "テントの入り口を締める", type: "check" },
+        { id: "f17", text: "コンテナ内薬品管理記録表の確認", type: "check" },
+        { id: "f18", text: "コンテナストレージの施錠確認", type: "check" },
+        { id: "f19", text: "厨房内の洗剤は所定の位置においてあるか", type: "check" },
+        { id: "f20", text: "水質検査記録表の検証を行う（日付入力）", type: "check" },
+        { id: "f21", text: "家庭ごみ 明日収集日？", type: "check", note: "該当曜日を確認" },
+        { id: "f22", text: "郵便BOX 確認", type: "check" },
+        { id: "f23", text: "湯沸かしポット（コード抜いた？お湯捨てた？）", type: "check" },
+        { id: "f24", text: "入口 シャッターを下ろす", type: "check" },
+        { id: "f25", text: "電気 使用量確認 １００V", type: "number", unit: "kWh" },
+        { id: "f26", text: "電気 使用量確認 ２００V", type: "number", unit: "kWh" },
+        { id: "f27", text: "水道 使用量確認", type: "number", unit: "㎥" },
+        { id: "f28", text: "ガス 使用量確認", type: "number", unit: "㎥" },
+      ]}
+    ]
+  },
+  clean: {
+    title: "🧹 清掃確認チェックシート",
+    badge: "④ 清掃確認",
+    hasTantou: true,
+    isChlorine: false,
+    sections: [
+      { label: "トイレ", areaClass: "area-toilet", items: [
+        { id: "c01", text: "便器（汚れ、詰まりはないか）", type: "check" },
+        { id: "c02", text: "床（掃き掃除）", type: "check" },
+        { id: "c03", text: "トイレットペーパー（替えの補充）", type: "check" },
+      ]},
+      { label: "廊下", areaClass: "area-hallway", items: [
+        { id: "c04", text: "床（水拭き）", type: "check", note: "週1回" },
+        { id: "c05", text: "マット（掃除機）6枚", type: "check" },
+        { id: "c06", text: "棚（結露、水たまり、虫の発生防止）", type: "check" },
+        { id: "c07", text: "靴箱（掃き掃除、ホコリ取り）", type: "check" },
+      ]},
+      { label: "厨房", areaClass: "area-kitchen", items: [
+        { id: "c08", text: "シンク内（生ゴミが残っていないか）", type: "check" },
+        { id: "c09", text: "床（ゴミが落ちていないか）", type: "check" },
+        { id: "c10", text: "ゴシゴシ（床水洗い）", type: "check", note: "週1回" },
+        { id: "c11", text: "掃除道具確認（トンボ3本、ブラシ3本）", type: "check" },
+        { id: "c12", text: "シーラー（ダスター汚れ、電源OFF）", type: "check" },
+        { id: "c13", text: "ゴミ箱（ゴミ袋入れ替え）", type: "check" },
+        { id: "c14", text: "ゴミ箱（水洗い）", type: "check", note: "週1回・木曜予定" },
+      ]},
+      { label: "加工室", areaClass: "area-processing", items: [
+        { id: "c15", text: "シンク内（生ゴミが残っていないか）", type: "check" },
+        { id: "c16", text: "床（ゴミが落ちていないか）", type: "check" },
+        { id: "c17", text: "ゴシゴシ（床水洗い）", type: "check", note: "週1回" },
+        { id: "c18", text: "ゴミ箱（ゴミ袋入れ替え）", type: "check" },
+        { id: "c19", text: "ゴミ箱（水洗い）", type: "check", note: "週1回・木曜予定" },
+        { id: "c20", text: "スライサー（破損確認）", type: "check" },
+      ]},
+      { label: "休憩室", areaClass: "area-break", items: [
+        { id: "c21", text: "掃き掃除 or 掃除機", type: "check" },
+      ]},
+    ]
+  }
+};
+
+let currentSheet = "";
+let currentSheetList = "before";
+let staffList = [];
+let checkState = {};
+
+window.addEventListener("DOMContentLoaded", () => {
+  document.getElementById("filterDate").value = todayStr();
+  loadStaff();
+});
+
+function todayStr() {
+  const d = new Date();
+  return d.getFullYear() + "-" + String(d.getMonth()+1).padStart(2,"0") + "-" + String(d.getDate()).padStart(2,"0");
+}
+
+// 画面遷移
+function goHome() {
+  document.getElementById("selectScreen").style.display = "";
+  document.getElementById("formScreen").style.display = "none";
+  document.getElementById("listScreen").style.display = "none";
+  window.scrollTo(0, 0);
+}
+
+function openForm(sheet) {
+  currentSheet = sheet;
+  document.getElementById("selectScreen").style.display = "none";
+  document.getElementById("formScreen").style.display = "";
+  document.getElementById("listScreen").style.display = "none";
+
+  const def = ITEMS[sheet];
+  const badge = document.getElementById("formTypeBadge");
+  badge.textContent = def.badge;
+  badge.className = "form-type-badge type-" + sheet;
+
+  const btn = document.getElementById("submitBtn");
+  btn.className = "submit-btn type-" + sheet;
+
+  // 残留塩素の場合は一括ボタン非表示、判定ボックス表示
+  document.getElementById("bulkBar").style.display = def.isChlorine ? "none" : "flex";
+  document.getElementById("judgmentBox").style.display = def.isChlorine ? "" : "none";
+  if (def.isChlorine) updateJudgment();
+
+  initCheckState(sheet);
+  renderCheckItems(sheet);
+  window.scrollTo(0, 0);
+}
+
+function openList() {
+  document.getElementById("selectScreen").style.display = "none";
+  document.getElementById("formScreen").style.display = "none";
+  document.getElementById("listScreen").style.display = "";
+  loadRecords();
+  window.scrollTo(0, 0);
+}
+
+function switchSheetList(sheet) {
+  currentSheetList = sheet;
+  document.querySelectorAll(".sheet-tab[data-sheet-list]").forEach(t => {
+    t.className = "sheet-tab";
+    if (t.dataset.sheetList === sheet) {
+      const cls = sheet === "before" ? "active-before" : sheet === "chlorine" ? "active-chlorine" : sheet === "final" ? "active-final" : "active-clean";
+      t.classList.add(cls);
+    }
+  });
+  loadRecords();
+}
+
+// チェック項目
+function initCheckState(sheet) {
+  checkState[sheet] = {};
+  const def = ITEMS[sheet];
+  def.sections.forEach(sec => {
+    sec.items.forEach(item => {
+      checkState[sheet][item.id] = { done: false, tantou: "", value: "", ox: "" };
+    });
+  });
+}
+
+function renderCheckItems(sheet) {
+  const def = ITEMS[sheet];
+  const container = document.getElementById("checkItems");
+  document.getElementById("sheetTitle").textContent = def.title;
+  let html = "";
+
+  def.sections.forEach(sec => {
+    if (sec.label) {
+      html += '<div class="check-section-label ' + (sec.areaClass || "") + '">' + sec.label + '</div>';
+    }
+    sec.items.forEach(item => {
+      const st = checkState[sheet][item.id];
+      html += '<div class="check-item">';
+      html += '<div class="label">' + item.text;
+      if (item.note) html += '<span class="note">' + item.note + '</span>';
+      html += '</div><div class="controls">';
+
+      if (item.type === "check") {
+        if (def.hasTantou) {
+          html += '<input class="tantou-mini" placeholder="担当" value="' + st.tantou + '" onchange="checkState[\'' + sheet + '\'][\'' + item.id + '\'].tantou=this.value">';
+        }
+        html += '<div class="cb ' + (st.done ? 'checked' : '') + '" onclick="toggleCheck(\'' + sheet + '\',\'' + item.id + '\',this)"></div>';
+      } else if (item.type === "number") {
+        html += '<input class="num-input" type="number" inputmode="decimal" placeholder="0" value="' + st.value + '" onchange="checkState[\'' + sheet + '\'][\'' + item.id + '\'].value=this.value">';
+        if (item.unit) html += '<span style="font-size:12px;color:var(--text-sub)">' + item.unit + '</span>';
+      } else if (item.type === "select") {
+        html += '<select class="select-input" onchange="checkState[\'' + sheet + '\'][\'' + item.id + '\'].value=this.value; updateJudgment();">';
+        html += '<option value="">-- 選択 --</option>';
+        CHLORINE_OPTIONS.forEach(v => {
+          const sel = st.value === v ? " selected" : "";
+          html += '<option value="' + v + '"' + sel + '>' + v + ' mg/L</option>';
+        });
+        html += '</select>';
+      } else if (item.type === "ox") {
+        const oxVal = st.ox;
+        const okCls = oxVal === "○" ? " ok" : "";
+        const ngCls = oxVal === "×" ? " ng" : "";
+        html += '<div class="ox-toggle' + okCls + '" onclick="setOx(\'' + sheet + '\',\'' + item.id + '\',\'○\',this)" style="margin-right:2px">○</div>';
+        html += '<div class="ox-toggle' + ngCls + '" onclick="setOx(\'' + sheet + '\',\'' + item.id + '\',\'×\',this)">×</div>';
+      }
+
+      html += '</div></div>';
+    });
+  });
+
+  container.innerHTML = html;
+  updateBanner();
+}
+
+function toggleCheck(sheet, id, el) {
+  checkState[sheet][id].done = !checkState[sheet][id].done;
+  el.classList.toggle("checked");
+  updateBanner();
+}
+
+function setOx(sheet, id, val, el) {
+  const st = checkState[sheet][id];
+  st.ox = (st.ox === val) ? "" : val;
+  renderCheckItems(sheet);
+}
+
+function checkAll() {
+  const def = ITEMS[currentSheet];
+  def.sections.forEach(sec => {
+    sec.items.forEach(item => {
+      if (item.type === "check") checkState[currentSheet][item.id].done = true;
+    });
+  });
+  renderCheckItems(currentSheet);
+}
+
+function uncheckAll() {
+  const def = ITEMS[currentSheet];
+  def.sections.forEach(sec => {
+    sec.items.forEach(item => {
+      if (item.type === "check") checkState[currentSheet][item.id].done = false;
+    });
+  });
+  renderCheckItems(currentSheet);
+}
+
+function updateBanner() {
+  if (!currentSheet || ITEMS[currentSheet].isChlorine) {
+    document.getElementById("incompleteBanner").className = "incomplete-banner";
+    return;
+  }
+  const def = ITEMS[currentSheet];
+  let total = 0, done = 0;
+  def.sections.forEach(sec => {
+    sec.items.forEach(item => {
+      if (item.type === "check") { total++; if (checkState[currentSheet][item.id].done) done++; }
+    });
+  });
+  const banner = document.getElementById("incompleteBanner");
+  if (total === 0) { banner.className = "incomplete-banner"; return; }
+  if (done === total) {
+    banner.className = "incomplete-banner all-done";
+    banner.textContent = "✅ 全 " + total + " 項目チェック完了！";
+  } else {
+    banner.className = "incomplete-banner has-incomplete";
+    banner.textContent = "⚠️ " + (total - done) + " 項目が未チェック（" + done + "/" + total + "）";
+  }
+}
+
+function updateJudgment() {
+  const box = document.getElementById("judgmentBox");
+  if (!checkState.chlorine) { return; }
+  const concVal = checkState.chlorine.cl01.value;
+  const oxItems = ["cl02","cl03","cl04","cl05"];
+  const allOx = oxItems.every(id => checkState.chlorine[id].ox === "○");
+
+  if (!concVal) {
+    box.className = "judgment-box pending";
+    box.textContent = "💧 濃度を選択してください";
+    return;
+  }
+  const conc = parseFloat(concVal);
+  if (conc >= 0.1 && allOx) {
+    box.className = "judgment-box pass";
+    box.textContent = "✅ 判定：適合（" + concVal + " mg/L）";
+  } else {
+    box.className = "judgment-box fail";
+    let reason = [];
+    if (conc < 0.1) reason.push("濃度不足");
+    if (!allOx) reason.push("官能検査に×あり");
+    box.textContent = "❌ 判定：不適合（" + reason.join("・") + "）";
+  }
+}
+
+// スタッフ
+async function loadStaff() {
+  try {
+    const res = await fetch(GAS_URL + "?action=getStaff");
+    const data = await res.json();
+    if (data.success) {
+      staffList = data.staff;
+      const sel = document.getElementById("staffSelect");
+      sel.innerHTML = '<option value="">👤 担当者を選択…</option>';
+      staffList.forEach(s => { sel.innerHTML += '<option value="' + s + '">' + s + '</option>'; });
+      setStatus(true);
+    }
+  } catch (e) { setStatus(false); }
+}
+
+function setStatus(ok) {
+  document.getElementById("statusDot").className = "dot " + (ok ? "green" : "red");
+  document.getElementById("statusText").textContent = ok ? "スプシ連携中" : "未接続";
+}
+
+// 送信
+async function submitCheck() {
+  const staff = document.getElementById("staffSelect").value;
+  if (!staff) { showToast("担当者を選択してください", "error"); return; }
+
+  const sheetTypeMap = { before: "作業前", chlorine: "残留塩素", final: "最終確認", clean: "清掃" };
+  const def = ITEMS[currentSheet];
+  const items = [];
+
+  def.sections.forEach(sec => {
+    sec.items.forEach(item => {
+      const st = checkState[currentSheet][item.id];
+      items.push({ label: item.text, type: item.type, done: st.done, tantou: st.tantou, value: st.value, ox: st.ox });
+    });
+  });
+
+  // バリデーション
+  if (def.isChlorine) {
+    if (!checkState.chlorine.cl01.value) {
+      showToast("残留塩素濃度を選択してください", "error"); return;
+    }
+    const oxItems = ["cl02","cl03","cl04","cl05"];
+    const missingOx = oxItems.filter(id => !checkState.chlorine[id].ox);
+    if (missingOx.length > 0) {
+      showToast("官能検査を全て選択してください", "error"); return;
+    }
+    // 判定を追加
+    const conc = parseFloat(checkState.chlorine.cl01.value);
+    const allOx = oxItems.every(id => checkState.chlorine[id].ox === "○");
+    items.push({ label: "判定", type: "text", value: (conc >= 0.1 && allOx) ? "適合" : "不適合" });
+  } else {
+    const checkItems = items.filter(i => i.type === "check");
+    const unchecked = checkItems.filter(i => !i.done).length;
+    if (unchecked > 0) {
+      if (!confirm(unchecked + "件が未チェックです。このまま送信しますか？")) return;
+    }
+  }
+
+  showLoading(true);
+  try {
+    const res = await fetch(GAS_URL, {
+      method: "POST",
+      body: JSON.stringify({
+        action: "submitCheck",
+        sheetType: sheetTypeMap[currentSheet],
+        staffName: staff,
+        items: items,
+        remarks: document.getElementById("remarks").value
+      })
+    });
+    const data = await res.json();
+    if (data.success) {
+      showToast(data.message, "success");
+      initCheckState(currentSheet);
+      renderCheckItems(currentSheet);
+      document.getElementById("remarks").value = "";
+      if (def.isChlorine) updateJudgment();
+    } else {
+      showToast("エラー: " + data.error, "error");
+    }
+  } catch (e) { showToast("通信エラー", "error"); }
+  showLoading(false);
+}
+
+// 一覧
+async function loadRecords() {
+  const sheetTypeMap = { before: "作業前", chlorine: "残留塩素", final: "最終確認", clean: "清掃" };
+  const dateVal = document.getElementById("filterDate").value;
+  const container = document.getElementById("recordsList");
+  showLoading(true);
+
+  try {
+    const url = GAS_URL + "?action=getRecords&sheetType=" + encodeURIComponent(sheetTypeMap[currentSheetList]) + "&date=" + dateVal;
+    const res = await fetch(url);
+    const data = await res.json();
+
+    if (!data.success || data.records.length === 0) {
+      container.innerHTML = '<div class="empty-msg">📭 記録がありません</div>';
+      showLoading(false); return;
+    }
+
+    let html = "";
+    data.records.forEach(rec => {
+      const row = rec.data;
+      html += '<div class="record-card"><div class="record-header">';
+      html += '<div><span class="datetime">' + (row[0]||"") + '</span><br><span class="staff-name">👤 ' + (row[1]||"") + '</span></div>';
+      html += '<button class="del-btn" onclick="deleteRecord(' + rec.rowIndex + ')">削除</button>';
+      html += '</div><div class="record-body">';
+
+      for (let i = 3; i < data.headers.length; i++) {
+        const h = data.headers[i];
+        const v = row[i] || "";
+        if (!h || h === "備考") continue;
+        const cls = v === "✓" ? "done" : v === "○" ? "done" : v === "×" ? "not-done" : v === "適合" ? "done" : v === "不適合" ? "not-done" : v === "" ? "not-done" : "";
+        const display = v === "" ? "—" : v;
+        html += '<div class="record-row"><span class="rlabel">' + h + '</span><span class="rval ' + cls + '">' + display + '</span></div>';
+      }
+      const ri = data.headers.indexOf("備考");
+      if (ri >= 0 && row[ri]) {
+        html += '<div class="record-row"><span class="rlabel">備考</span><span class="rval">' + row[ri] + '</span></div>';
+      }
+      html += '</div></div>';
+    });
+    container.innerHTML = html;
+  } catch (e) {
+    container.innerHTML = '<div class="empty-msg">⚠️ 読み込みエラー</div>';
+  }
+  showLoading(false);
+}
+
+async function deleteRecord(rowIndex) {
+  if (!confirm("この記録を削除しますか？")) return;
+  const sheetTypeMap = { before: "作業前", chlorine: "残留塩素", final: "最終確認", clean: "清掃" };
+  showLoading(true);
+  try {
+    const res = await fetch(GAS_URL, {
+      method: "POST",
+      body: JSON.stringify({ action: "deleteRecord", sheetType: sheetTypeMap[currentSheetList], rowIndex: rowIndex })
+    });
+    const data = await res.json();
+    if (data.success) { showToast("削除しました", "success"); loadRecords(); }
+    else { showToast("エラー: " + data.error, "error"); }
+  } catch (e) { showToast("通信エラー", "error"); }
+  showLoading(false);
+}
+
+function showLoading(show) { document.getElementById("loading").style.display = show ? "flex" : "none"; }
+function showToast(msg, type) {
+  const t = document.getElementById("toast");
+  t.textContent = msg;
+  t.className = "toast " + type + " show";
+  setTimeout(() => t.classList.remove("show"), 2500);
+}
+</script>
+</body>
+</html>
