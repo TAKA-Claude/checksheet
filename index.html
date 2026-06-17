@@ -26,7 +26,7 @@ body{font-family:-apple-system,BlinkMacSystemFont,"Hiragino Sans",Meiryo,sans-se
   <div style="display:flex;flex-direction:column;gap:12px">
     <div onclick="openForm('before')" style="display:flex;align-items:center;gap:14px;padding:18px 16px;background:#fff;border-radius:14px;box-shadow:0 1px 3px rgba(0,0,0,0.08);border-left:5px solid #2563eb;cursor:pointer">
       <div style="width:48px;height:48px;border-radius:12px;display:flex;align-items:center;justify-content:center;font-size:24px;background:#dbeafe">🌅</div>
-      <div style="flex:1"><div style="font-size:16px;font-weight:700">① 作業前確認</div><div style="font-size:12px;color:#64748b;margin-top:3px">15項目 ｜ 通電・外回り・衛生チェック</div></div>
+      <div style="flex:1"><div style="font-size:16px;font-weight:700">① 作業前確認</div><div style="font-size:12px;color:#64748b;margin-top:3px"><span data-desc="before">15項目</span> ｜ 通電・外回り・衛生チェック</div></div>
       <div style="color:#64748b;font-size:20px">›</div>
     </div>
     <div onclick="openForm('chlorine')" style="display:flex;align-items:center;gap:14px;padding:18px 16px;background:#fff;border-radius:14px;box-shadow:0 1px 3px rgba(0,0,0,0.08);border-left:5px solid #0891b2;cursor:pointer">
@@ -36,12 +36,12 @@ body{font-family:-apple-system,BlinkMacSystemFont,"Hiragino Sans",Meiryo,sans-se
     </div>
     <div onclick="openForm('final')" style="display:flex;align-items:center;gap:14px;padding:18px 16px;background:#fff;border-radius:14px;box-shadow:0 1px 3px rgba(0,0,0,0.08);border-left:5px solid #ea580c;cursor:pointer">
       <div style="width:48px;height:48px;border-radius:12px;display:flex;align-items:center;justify-content:center;font-size:24px;background:#fff7ed">🌙</div>
-      <div style="flex:1"><div style="font-size:16px;font-weight:700">③ 最終確認</div><div style="font-size:12px;color:#64748b;margin-top:3px">28項目 ｜ 電源OFF・施錠・使用量記録</div></div>
+      <div style="flex:1"><div style="font-size:16px;font-weight:700">③ 最終確認</div><div style="font-size:12px;color:#64748b;margin-top:3px"><span data-desc="final">28項目</span> ｜ 電源OFF・施錠・使用量記録</div></div>
       <div style="color:#64748b;font-size:20px">›</div>
     </div>
     <div onclick="openForm('clean')" style="display:flex;align-items:center;gap:14px;padding:18px 16px;background:#fff;border-radius:14px;box-shadow:0 1px 3px rgba(0,0,0,0.08);border-left:5px solid #16a34a;cursor:pointer">
       <div style="width:48px;height:48px;border-radius:12px;display:flex;align-items:center;justify-content:center;font-size:24px;background:#dcfce7">🧹</div>
-      <div style="flex:1"><div style="font-size:16px;font-weight:700">④ 清掃確認</div><div style="font-size:12px;color:#64748b;margin-top:3px">21項目 ｜ トイレ・廊下・厨房・加工室・休憩室</div></div>
+      <div style="flex:1"><div style="font-size:16px;font-weight:700">④ 清掃確認</div><div style="font-size:12px;color:#64748b;margin-top:3px"><span data-desc="clean">21項目</span> ｜ トイレ・廊下・厨房・加工室・休憩室</div></div>
       <div style="color:#64748b;font-size:20px">›</div>
     </div>
   </div>
@@ -118,85 +118,54 @@ var COLORS = {before:"#2563eb",chlorine:"#0891b2",final:"#ea580c",clean:"#16a34a
 var COLORS_LIGHT = {before:"#dbeafe",chlorine:"#cffafe",final:"#fff7ed",clean:"#dcfce7"};
 var AREA_COLORS = {toilet:"#7c3aed",hallway:"#0891b2",kitchen:"#c2410c",processing:"#15803d",break:"#b45309"};
 
-var ITEMS = {
-  before: {
-    title: "🌅 作業前確認チェックシート", badge: "① 作業前確認", hasTantou: false, isChlorine: false,
-    sections: [{ label: null, items: [
-      {id:"b01",text:"冷凍庫（雷神）通電チェック",type:"check"},{id:"b02",text:"冷蔵庫（風神）通電チェック",type:"check"},
-      {id:"b03",text:"温度っちのランプは青色か",type:"check"},{id:"b04",text:"水たまり、雑草の確認",type:"check"},
-      {id:"b05",text:"外壁の破損、隙間はないか",type:"check"},{id:"b06",text:"鳥の巣は作られていないか",type:"check"},
-      {id:"b07",text:"廃棄物置き場は清潔か",type:"check"},{id:"b08",text:"郵便BOX 確認",type:"check"},
-      {id:"b09",text:"健康チェックシートに未記載の人はいないか",type:"check"},{id:"b10",text:"マットに除菌液をかける（2枚）",type:"check"},
-      {id:"b11",text:"水質検査を行う（残留塩素チェック）",type:"check"},{id:"b12",text:"テント（しげお）内に虫の発生はないか",type:"check"},
-      {id:"b13",text:"薬品BOXの安全確認",type:"check"},{id:"b14",text:"休憩室のエアコンは消えているか",type:"check"},
-      {id:"b15",text:"休憩室の鍵は閉まっているか",type:"check"}
-    ]}]
-  },
-  chlorine: {
-    title: "💧 残留塩素確認（水質検査記録）", badge: "② 残留塩素確認", hasTantou: false, isChlorine: true,
-    sections: [{ label: null, items: [
-      {id:"cl01",text:"残留塩素濃度",type:"select",note:"基準値: 0.1〜1.0 mg/L"},
-      {id:"cl02",text:"色",type:"ox"},{id:"cl03",text:"臭い",type:"ox"},{id:"cl04",text:"味",type:"ox"},{id:"cl05",text:"濁り",type:"ox"}
-    ]}]
-  },
-  final: {
-    title: "🌙 最終確認チェックシート", badge: "③ 最終確認", hasTantou: true, isChlorine: false,
-    sections: [{ label: null, items: [
-      {id:"f01",text:"ガス元栓OFF（スープケトル）",type:"check"},{id:"f02",text:"ガス＆電源OFF（撹拌機2号）",type:"check"},
-      {id:"f03",text:"ガス＆電源OFF（撹拌機3号）",type:"check"},{id:"f04",text:"換気口（シャラシャラ）閉鎖",type:"check"},
-      {id:"f05",text:"シーラー 電源OFF",type:"check"},{id:"f06",text:"全IHコンロ、電源OFF",type:"check"},
-      {id:"f07",text:"全換気扇、エアコン電源OFF",type:"check"},{id:"f08",text:"ティファール電源OFF",type:"check"},
-      {id:"f09",text:"ラジオOFF",type:"check"},{id:"f10",text:"まな板殺菌庫 ON、タイマー、スタート",type:"check"},
-      {id:"f11",text:"蛇口（ちゃんと閉めた？）チェック",type:"check"},{id:"f12",text:"各シンク 洗剤、アルコール、ペーパー補充OK？",type:"check"},
-      {id:"f13",text:"冷凍庫（雷神）通電チェック",type:"check"},{id:"f14",text:"冷蔵庫（風神）通電チェック",type:"check"},
-      {id:"f15",text:"温度っちのランプは青色か",type:"check"},{id:"f16",text:"テントの入り口を締める",type:"check"},
-      {id:"f17",text:"コンテナ内薬品管理記録表の確認",type:"check"},{id:"f18",text:"コンテナストレージの施錠確認",type:"check"},
-      {id:"f19",text:"厨房内の洗剤は所定の位置においてあるか",type:"check"},{id:"f20",text:"水質検査記録表の検証を行う（日付入力）",type:"check"},
-      {id:"f21",text:"家庭ごみ 明日収集日？",type:"check",note:"該当曜日を確認"},{id:"f22",text:"郵便BOX 確認",type:"check"},
-      {id:"f23",text:"湯沸かしポット（コード抜いた？お湯捨てた？）",type:"check"},{id:"f24",text:"入口 シャッターを下ろす",type:"check"},
-      {id:"f25",text:"電気 使用量確認 100V",type:"number",unit:"kWh"},{id:"f26",text:"電気 使用量確認 200V",type:"number",unit:"kWh"},
-      {id:"f27",text:"水道 使用量確認",type:"number",unit:"㎥"},{id:"f28",text:"ガス 使用量確認",type:"number",unit:"㎥"}
-    ]}]
-  },
-  clean: {
-    title: "🧹 清掃確認チェックシート", badge: "④ 清掃確認", hasTantou: true, isChlorine: false,
-    sections: [
-      {label:"トイレ",area:"toilet",items:[
-        {id:"c01",text:"便器（汚れ、詰まりはないか）",type:"check"},{id:"c02",text:"床（掃き掃除）",type:"check"},
-        {id:"c03",text:"トイレットペーパー（替えの補充）",type:"check"}
-      ]},
-      {label:"廊下",area:"hallway",items:[
-        {id:"c04",text:"床（水拭き）",type:"check",note:"週1回"},{id:"c05",text:"マット（掃除機）6枚",type:"check"},
-        {id:"c06",text:"棚（結露、水たまり、虫の発生防止）",type:"check"},{id:"c07",text:"靴箱（掃き掃除、ホコリ取り）",type:"check"}
-      ]},
-      {label:"厨房",area:"kitchen",items:[
-        {id:"c08",text:"シンク内（生ゴミが残っていないか）",type:"check"},{id:"c09",text:"床（ゴミが落ちていないか）",type:"check"},
-        {id:"c10",text:"ゴシゴシ（床水洗い）",type:"check",note:"週1回"},{id:"c11",text:"掃除道具確認（トンボ3本、ブラシ3本）",type:"check"},
-        {id:"c12",text:"シーラー（ダスター汚れ、電源OFF）",type:"check"},{id:"c13",text:"ゴミ箱（ゴミ袋入れ替え）",type:"check"},
-        {id:"c14",text:"ゴミ箱（水洗い）",type:"check",note:"週1回・木曜予定"}
-      ]},
-      {label:"加工室",area:"processing",items:[
-        {id:"c15",text:"シンク内（生ゴミが残っていないか）",type:"check"},{id:"c16",text:"床（ゴミが落ちていないか）",type:"check"},
-        {id:"c17",text:"ゴシゴシ（床水洗い）",type:"check",note:"週1回"},{id:"c18",text:"ゴミ箱（ゴミ袋入れ替え）",type:"check"},
-        {id:"c19",text:"ゴミ箱（水洗い）",type:"check",note:"週1回・木曜予定"},{id:"c20",text:"スライサー（破損確認）",type:"check"}
-      ]},
-      {label:"休憩室",area:"break",items:[
-        {id:"c21",text:"掃き掃除 or 掃除機",type:"check"}
-      ]}
-    ]
-  }
-};
+var ITEMS = {};
 
 var currentSheet = "", currentSheetList = "before", staffList = [], checkState = {};
 
 window.addEventListener("DOMContentLoaded", function() {
   document.getElementById("filterDate").value = todayStr();
   loadStaff();
+  loadItems();
 });
 
 function todayStr() {
   var d = new Date();
   return d.getFullYear() + "-" + String(d.getMonth()+1).padStart(2,"0") + "-" + String(d.getDate()).padStart(2,"0");
+}
+
+async function loadItems() {
+  try {
+    var res = await fetch(GAS_URL + "?action=getItems");
+    var data = await res.json();
+    if (data.success && data.items) {
+      ITEMS = {};
+      if (data.items.before) ITEMS.before = data.items.before;
+      if (data.items.chlorine) ITEMS.chlorine = data.items.chlorine;
+      if (data.items.final) ITEMS.final = data.items.final;
+      if (data.items.clean) ITEMS.clean = data.items.clean;
+      // 選択画面の項目数を更新
+      var counts = {
+        before: countItems(ITEMS.before),
+        chlorine: countItems(ITEMS.chlorine),
+        final: countItems(ITEMS.final),
+        clean: countItems(ITEMS.clean)
+      };
+      var descEls = document.querySelectorAll("[data-desc]");
+      descEls.forEach(function(el) {
+        var key = el.dataset.desc;
+        if (counts[key] !== undefined) {
+          el.textContent = counts[key] + "項目";
+        }
+      });
+    }
+  } catch (e) { /* 読み込み失敗時はITEMSが空のまま */ }
+}
+
+function countItems(def) {
+  if (!def) return 0;
+  var c = 0;
+  def.sections.forEach(function(sec) { c += sec.items.length; });
+  return c;
 }
 
 function goHome() {
@@ -207,6 +176,7 @@ function goHome() {
 }
 
 function openForm(sheet) {
+  if (!ITEMS[sheet]) { showToast("項目を読み込み中です。少し待ってからタップしてください", "#ea580c"); return; }
   currentSheet = sheet;
   document.getElementById("selectScreen").style.display = "none";
   document.getElementById("formScreen").style.display = "block";
